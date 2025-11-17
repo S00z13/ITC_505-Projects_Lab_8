@@ -129,8 +129,12 @@
             const safeEmail = sanitizeInput(email);
 
             const successDiv = document.getElementById("successMessage");
-            successDiv.textContent =
-                `Registration successful! Welcome, ${safeFirstName} ${safeLastName} (${safeEmail}).`;
+successDiv.textContent =
+    `Registration successful! Welcome, ${safeFirstName} ${safeLastName} (${safeEmail}).`;
+
+// Clear the form after successful registration
+document.getElementById("registrationForm").reset();
+document.getElementById("firstName").focus(); // optional: put cursor back in first name
         });
     </script>
 </body>
