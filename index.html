@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lab 8 - Form Validation and XSS Prevention</title>
+
+    <!-- Orbitron font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- External CSS file -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Registration Form</h1>
+
+    <form id="registrationForm" novalidate>
+        <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName">
+            <div class="error" id="firstNameError"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName">
+            <div class="error" id="lastNameError"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email ID:</label>
+            <input type="email" id="email" name="email">
+            <div class="error" id="emailError"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password">
+            <div class="error" id="passwordError"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword">
+            <div class="error" id="confirmPasswordError"></div>
+        </div>
+
+        <button type="submit">Register</button>
+
+        <div id="errorMessages"></div>
+        <div id="successMessage"></div>
+    </form>
+
+    <script>
+        // --------- XSS PREVENTION HELPER ----------
+        function sanitizeInput(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function isValidEmail(email) {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailPattern.test(email);
+        }
+
+        document.getElementById("registrationForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            document.getElementById("errorMessages").textContent = "";
+            document.getElementById("successMessage").textContent = "";
+            document.getElementById("firstNameError").textContent = "";
+            document.getElementById("lastNameError").textContent = "";
+            document.getElementById("emailError").textContent = "";
+            document.getElementById("passwordError").textContent = "";
+            document.getElementById("confirmPasswordError").textContent = "";
+
+            const errors = [];
+
+            const firstName = document.getElementById("firstName").value.trim();
+            const lastName = document.getElementById("lastName").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            if (firstName === "") {
+                document.getElementById("firstNameError").textContent = "First name is required.";
+                errors.push("First name is required.");
+            }
+
+            if (lastName === "") {
+                document.getElementById("lastNameError").textContent = "Last name is required.";
+                errors.push("Last name is required.");
+            }
+
+            if (email === "") {
+                document.getElementById("emailError").textContent = "Email is required.";
+                errors.push("Email is required.");
+            } else if (!isValidEmail(email)) {
+                document.getElementById("emailError").textContent = "Please enter a valid email address.";
+                errors.push("Invalid email format.");
+            }
+
+            if (password === "") {
+                document.getElementById("passwordError").textContent = "Password is required.";
+                errors.push("Password is required.");
+            }
+
+            if (confirmPassword === "") {
+                document.getElementById("confirmPasswordError").textContent = "Please confirm your password.";
+                errors.push("Confirm password is required.");
+            } else if (password !== "" && password !== confirmPassword) {
+                document.getElementById("confirmPasswordError").textContent = "Passwords do not match.";
+                errors.push("Passwords do not match.");
+            }
+
+            if (errors.length > 0) {
+                document.getElementById("errorMessages").textContent =
+                    "Please fix the errors above before submitting.";
+                return;
+            }
+
+            const safeFirstName = sanitizeInput(firstName);
+            const safeLastName = sanitizeInput(lastName);
+            const safeEmail = sanitizeInput(email);
+
+            const successDiv = document.getElementById("successMessage");
+            successDiv.textContent =
+                `Registration successful! Welcome, ${safeFirstName} ${safeLastName} (${safeEmail}).`;
+        });
+    </script>
+</body>
+</html>
